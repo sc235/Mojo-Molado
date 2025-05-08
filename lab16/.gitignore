@@ -1,0 +1,13 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+*.log
+connections.log
+
+# Environment variables
+.env
+
+# Frontend framework build (if any like React/Vite)
+dist/
+build/
