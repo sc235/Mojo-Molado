@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mojo Molado - Boutique de Mode Africaine</title>
+  <meta name="description" content="L’élégance africaine à portée de main. Boutique Mojo Molado à Dakar : vêtements, chaussures, sacs, parfums." />
+  <meta property="og:title" content="Mojo Molado - Mode Africaine" />
+  <meta property="og:description" content="Découvrez notre sélection : vêtements, chaussures, sacs, parfums." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div id="page-loader" class="loader" aria-hidden="true">
+    <div class="loader-spinner" aria-label="Chargement"></div>
+  </div>
+
+  <header class="header">
+    <button class="theme-toggle" aria-label="Changer le thème" onclick="toggleTheme()">
+      <i class="fas fa-moon"></i>
+    </button>
+    <div class="header-content">
+      <img src="images/M.png" alt="Logo Mojo Molado" class="header-logo">
+      <div>
+      <h1>Mojo Molado</h1>
+        <p class="tagline">L’élégance africaine à portée de main</p>
+    </div>
+    </div>
+    <nav class="nav" aria-label="Navigation principale">
+      <button onclick="navigateTo('home')">Accueil</button>
+      <button onclick="navigateTo('shop')">Boutique</button>
+      <button onclick="navigateTo('about')">À propos</button>
+      <button onclick="navigateTo('contact')">Contact</button>
+    </nav>
+  </header>
+
+  <div class="icons">
+    <button class="icon-button" onclick="toggleWishlist()" aria-label="Voir les favoris">
+      <i class="fas fa-heart" aria-hidden="true"></i>
+      <span id="wishlist-count" class="badge">0</span>
+    </button>
+    <button class="icon-button" onclick="toggleCart()" aria-label="Voir le panier">
+      <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+      <span id="cart-count" class="badge">0</span>
+    </button>
+  </div>
+
+  <section class="search-bar">
+    <input type="search" id="search-input" placeholder="Rechercher un produit…" oninput="searchProducts()" aria-label="Rechercher" />
+    <select id="sort-select" onchange="sortProducts()" aria-label="Trier les produits">
+      <option value="default">Trier par</option>
+      <option value="price-asc">Prix : Croissant</option>
+      <option value="price-desc">Prix : Décroissant</option>
+      <option value="name-asc">Nom : A–Z</option>
+      <option value="name-desc">Nom : Z–A</option>
+    </select>
+    <div class="filters">
+      <button onclick="filterCategory('Tous')">Tous</button>
+      <button onclick="filterCategory('Vêtements')">Vêtements</button>
+      <button onclick="filterCategory('Sacs')">Sacs</button>
+      <button onclick="filterCategory('Parfums')">Parfums</button>
+  </div>
+  </section>
+
+  <main id="shop">
+    <h2 id="section-title">Nos Articles</h2>
+    <div id="status-message" aria-live="polite"></div>
+    <div id="loader" class="loader" aria-hidden="true"></div>
+    <div id="product-list" class="product-grid" aria-live="polite"></div>
+    <div style="text-align:center; margin-top:16px;">
+      <button id="load-more" style="display:none;" onclick="loadMore()">Afficher plus</button>
+    </div>
+  </main>
+
+  <section id="about" style="max-width: 900px; margin: 30px auto; padding: 16px;">
+    <h2>À propos</h2>
+    <p>Mojo Molado est une boutique de mode africaine basée à Dakar. Nous sélectionnons des pièces élégantes (vêtements, sacs, parfums) avec un soin particulier pour les détails et la qualité.</p>
+  </section>
+
+  <section id="contact" style="max-width: 900px; margin: 0 auto 30px; padding: 16px;">
+    <h2>Contact</h2>
+    <p>WhatsApp: <a href="https://wa.me/221710433624" target="_blank" rel="noopener">+221 71 043 36 24</a></p>
+    <p>TikTok: <a href="https://www.tiktok.com/@mojomalado_?lang=fr" target="_blank" rel="noopener">@mojomolado</a></p>
+    <p>Adresse: Dakar, Sandaga, Rue Thiong</p>
+  </section>
+
+  <section class="newsletter">
+    <h3>Newsletter</h3>
+    <div class="newsletter-form">
+      <input type="email" id="newsletter-email" placeholder="Votre email" aria-label="Email newsletter">
+      <button onclick="subscribeNewsletter()">S’abonner</button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2025 Mojo Molado — Dakar, Sénégal</p>
+    <div class="social-links">
+      <a href="https://facebook.com/modjomolado" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+      <a href="https://instagram.com/modjomolado" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="https://wa.me/221776276363" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    </div>
+  </footer>
+
+  <button class="back-to-top" onclick="scrollToTop()" aria-label="Retour en haut">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <!-- Modals -->
+  <div id="product-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-name" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()" aria-label="Fermer">×</button>
+      <img id="modal-image" src="" alt="Produit" />
+      <h3 id="modal-name" tabindex="-1"></h3>
+      <p id="modal-price"></p>
+      <p id="modal-description"></p>
+      <div class="rating" id="modal-rating"></div>
+      <button id="modal-add-cart" onclick="addToCartFromModal()">Ajouter au panier</button>
+      <button onclick="addToWishlistFromModal()">Ajouter aux favoris</button>
+      <button onclick="closeModalToHome()">Fermer et retour à l’accueil</button>
+    </div>
+  </div>
+
+  <div id="cart-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeCart()" aria-label="Fermer">×</button>
+      <h2>Votre Panier</h2>
+      <div id="cart-items"></div>
+      <p><strong>Total: <span id="cart-total">0 FCFA</span></strong></p>
+      <button onclick="checkout()">Commander (Démo)</button>
+    </div>
+  </div>
+
+  <div id="wishlist-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeWishlist()" aria-label="Fermer">×</button>
+      <h2>Vos Favoris</h2>
+      <div id="wishlist-items"></div>
+    </div>
+  </div>
+
+  <div id="newsletter-modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeNewsletterModal()" aria-label="Fermer">×</button>
+      <h2>Inscription réussie</h2>
+      <p>Merci ! Vous recevrez bientôt nos offres et nouveautés.</p>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
