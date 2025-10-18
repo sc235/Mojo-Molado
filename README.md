@@ -77,4 +77,3 @@ mojomolado/
 - Dakar, Sénégal — Mojo Molado
 - WhatsApp: `+221 77 627 6363`
 - Instagram / Facebook: `@modjomolado`
-# Mojo-Molado

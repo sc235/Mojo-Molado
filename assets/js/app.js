@@ -95,6 +95,9 @@ function renderList(list) {
     loader.style.display = 'none';
 
     if (list.length === 0) setStatus('Aucun produit trouvé.'); else setStatus('');
+    
+    // Animer les nouvelles cartes
+    setTimeout(() => animateProductCards(), 100);
   }, 200);
 }
 
@@ -256,8 +259,31 @@ function updateCart() {
 
 function checkout() {
   if (!cart.length) return showToast('Votre panier est vide');
-  showToast('Paiement (démo) en cours…');
-  setTimeout(() => { showToast('Paiement réussi (démo)'); cart = []; saveCart(); updateCart(); }, 1200);
+  
+  // Créer le message WhatsApp avec les articles du panier
+  let message = "Bonjour ! Je souhaite commander les articles suivants :\n\n";
+  let total = 0;
+  
+  cart.forEach((item, index) => {
+    message += `${index + 1}. ${item.name} - ${item.priceDisplay} x${item.quantity}\n`;
+    total += item.price * item.quantity;
+  });
+  
+  message += `\nTotal : ${total.toLocaleString()} FCFA\n\n`;
+  message += "Merci !";
+  
+  // Encoder le message pour l'URL
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/221710433624?text=${encodedMessage}`;
+  
+  // Ouvrir WhatsApp
+  window.open(whatsappUrl, '_blank');
+  
+  // Vider le panier après envoi
+  cart = [];
+  saveCart();
+  updateCart();
+  closeCart();
 }
 
 function addToWishlist(id) {
@@ -335,20 +361,122 @@ window.addEventListener('scroll', () => {
 });
 
 function showToast(message) {
-  const note = document.createElement('div');
-  note.className = 'notification';
-  note.textContent = message;
-  Object.assign(note.style, {
-    position: 'fixed', left: '50%', bottom: '24px', transform: 'translateX(-50%)',
-    background: 'var(--text-color)', color: 'var(--bg-color)', padding: '12px 18px', borderRadius: '999px', zIndex: 200,
-  });
-  document.body.appendChild(note);
-  setTimeout(() => note.remove(), 1800);
+  showAnimatedToast(message, 'info');
 }
 
 function closeModalToHome() {
   closeModal();
   navigateTo('shop');
+}
+
+// Animations de la page
+function setupPageAnimations() {
+  // Animation d'entrée pour les éléments de la page
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observer les sections principales
+  const sections = document.querySelectorAll('section, .product-card, .newsletter');
+  sections.forEach(section => {
+    section.style.opacity = '0';
+    section.style.transform = 'translateY(30px)';
+    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(section);
+  });
+}
+
+// Animations des boutons
+function setupButtonAnimations() {
+  // Animation de clic pour tous les boutons
+  const buttons = document.querySelectorAll('button, .icon-button');
+  
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Créer un effet de ripple
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.style.position = 'absolute';
+      ripple.style.borderRadius = '50%';
+      ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+      ripple.style.transform = 'scale(0)';
+      ripple.style.animation = 'ripple 0.6s linear';
+      ripple.style.pointerEvents = 'none';
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+}
+
+// Animation de chargement des produits
+function animateProductCards() {
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    
+    setTimeout(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 100); // Délai échelonné
+  });
+}
+
+// Animation de notification
+function showAnimatedToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--text-color);
+    color: var(--bg-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Animation d'entrée
+  setTimeout(() => {
+    toast.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Animation de sortie
+  setTimeout(() => {
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 function navigateTo(sectionId) {
@@ -395,4 +523,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (sortSelect && sortSelect.value !== state.sort) sortSelect.value = state.sort;
 
   applyFiltersFromState(state);
+  setupPageAnimations();
+  setupButtonAnimations();
 });
