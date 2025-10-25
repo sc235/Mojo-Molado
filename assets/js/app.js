@@ -76,7 +76,10 @@ function renderList(list) {
         ${p.isFeatured ? '<span class=\"badge-chip\">En vedette</span>' : ''}
       `;
       card.innerHTML = `
-        <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async">
+        <div class="image-container">
+          <div class="image-placeholder"></div>
+          <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';" onerror="this.style.display='none'; this.previousElementSibling.innerHTML='<i class=\"fas fa-image\" style=\"font-size: 48px; color: #ccc;\"></i>';">
+        </div>
         <div class="product-body">
           <div class="product-badges">${badges}</div>
           <h3>${p.name}</h3>
@@ -95,9 +98,6 @@ function renderList(list) {
     loader.style.display = 'none';
 
     if (list.length === 0) setStatus('Aucun produit trouvé.'); else setStatus('');
-    
-    // Animer les nouvelles cartes
-    setTimeout(() => animateProductCards(), 100);
   }, 200);
 }
 
@@ -242,14 +242,19 @@ function updateCart() {
     const row = document.createElement('div');
     row.className = 'cart-item';
     row.innerHTML = `
-      <span>${it.name}</span>
-      <div class="cart-item-controls">
-        <button onclick="updateCartItemQuantity(${it.id}, ${it.quantity - 1})">-</button>
-        <span>${it.quantity}</span>
-        <button onclick="updateCartItemQuantity(${it.id}, ${it.quantity + 1})">+</button>
+      <div style="flex: 1;">
+        <div style="font-weight: 600;">${it.name}</div>
+        <div style="font-size: 14px; color: #666;">${it.priceDisplay} chacun</div>
       </div>
-      <span>${(it.price * it.quantity).toLocaleString()} FCFA</span>
-      <button onclick="removeFromCart(${it.id})">Supprimer</button>
+      <div class="cart-item-controls">
+        <button onclick="updateCartItemQuantity(${it.id}, ${it.quantity - 1})" aria-label="Diminuer quantité">-</button>
+        <span>${it.quantity}</span>
+        <button onclick="updateCartItemQuantity(${it.id}, ${it.quantity + 1})" aria-label="Augmenter quantité">+</button>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-weight: 600;">${(it.price * it.quantity).toLocaleString()} FCFA</div>
+        <button onclick="removeFromCart(${it.id})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 4px;">Supprimer</button>
+      </div>
     `;
     items.appendChild(row);
   });
@@ -320,11 +325,20 @@ function subscribeNewsletter() {
   const email = document.getElementById('newsletter-email').value.trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (email && emailRegex.test(email)) {
+    // TODO: Replace with actual server-side integration
+    // Example: fetch('/api/newsletter/subscribe', { method: 'POST', body: JSON.stringify({ email }) })
     const subs = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
-    if (!subs.includes(email)) subs.push(email);
-    localStorage.setItem('newsletterSubscriptions', JSON.stringify(subs));
-    document.getElementById('newsletter-modal').style.display = 'flex';
-    document.getElementById('newsletter-email').value = '';
+    if (!subs.includes(email)) {
+      subs.push(email);
+      localStorage.setItem('newsletterSubscriptions', JSON.stringify(subs));
+      // Simulate server response
+      setTimeout(() => {
+        document.getElementById('newsletter-modal').style.display = 'flex';
+        document.getElementById('newsletter-email').value = '';
+      }, 500);
+    } else {
+      showToast('Vous êtes déjà inscrit à la newsletter');
+    }
   } else {
     showToast('Veuillez entrer une adresse email valide');
   }
@@ -361,7 +375,15 @@ window.addEventListener('scroll', () => {
 });
 
 function showToast(message) {
-  showAnimatedToast(message, 'info');
+  const note = document.createElement('div');
+  note.className = 'notification';
+  note.textContent = message;
+  Object.assign(note.style, {
+    position: 'fixed', left: '50%', bottom: '24px', transform: 'translateX(-50%)',
+    background: 'var(--text-color)', color: 'var(--bg-color)', padding: '12px 18px', borderRadius: '999px', zIndex: 200,
+  });
+  document.body.appendChild(note);
+  setTimeout(() => note.remove(), 1800);
 }
 
 function closeModalToHome() {
@@ -369,115 +391,6 @@ function closeModalToHome() {
   navigateTo('shop');
 }
 
-// Animations de la page
-function setupPageAnimations() {
-  // Animation d'entrée pour les éléments de la page
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, observerOptions);
-
-  // Observer les sections principales
-  const sections = document.querySelectorAll('section, .product-card, .newsletter');
-  sections.forEach(section => {
-    section.style.opacity = '0';
-    section.style.transform = 'translateY(30px)';
-    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(section);
-  });
-}
-
-// Animations des boutons
-function setupButtonAnimations() {
-  // Animation de clic pour tous les boutons
-  const buttons = document.querySelectorAll('button, .icon-button');
-  
-  buttons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      // Créer un effet de ripple
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      ripple.style.position = 'absolute';
-      ripple.style.borderRadius = '50%';
-      ripple.style.background = 'rgba(255, 255, 255, 0.3)';
-      ripple.style.transform = 'scale(0)';
-      ripple.style.animation = 'ripple 0.6s linear';
-      ripple.style.pointerEvents = 'none';
-      
-      this.style.position = 'relative';
-      this.style.overflow = 'hidden';
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
-  });
-}
-
-// Animation de chargement des produits
-function animateProductCards() {
-  const cards = document.querySelectorAll('.product-card');
-  cards.forEach((card, index) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    
-    setTimeout(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, index * 100); // Délai échelonné
-  });
-}
-
-// Animation de notification
-function showAnimatedToast(message, type = 'info') {
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-  toast.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--text-color);
-    color: var(--bg-color);
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-  `;
-  
-  document.body.appendChild(toast);
-  
-  // Animation d'entrée
-  setTimeout(() => {
-    toast.style.transform = 'translateX(0)';
-  }, 100);
-  
-  // Animation de sortie
-  setTimeout(() => {
-    toast.style.transform = 'translateX(100%)';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
 
 function navigateTo(sectionId) {
   if (sectionId && document.getElementById(sectionId)) {
@@ -523,6 +436,4 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (sortSelect && sortSelect.value !== state.sort) sortSelect.value = state.sort;
 
   applyFiltersFromState(state);
-  setupPageAnimations();
-  setupButtonAnimations();
 });

@@ -46,15 +46,15 @@ mojomolado/
 - Format exemple (`data/products.json`):
 ```json
 [
-  {
-    "id": 1,
+{
+  "id": 1,
     "name": "Robe en wax",
     "category": "Vêtements",
-    "price": 15000,
+  "price": 15000,
     "priceDisplay": "15 000 FCFA",
     "image": "images/robeRouge.jpg",
     "description": "Robe en wax colorée, élégante et confortable.",
-    "rating": 4.5,
+  "rating": 4.5,
     "isNew": true
   }
 ]
